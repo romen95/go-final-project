@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/romen95/go_final_project/app/model"
-	"github.com/romen95/go_final_project/app/service"
+	"github.com/romen95/go_final_project/app/internal"
 )
 
-func NextDateReadGET(w http.ResponseWriter, r *http.Request) {
-	now, err := time.Parse(model.DatePattern, r.FormValue("now"))
+func NextDate(w http.ResponseWriter, r *http.Request) {
+	now, err := time.Parse("20060102", r.FormValue("now"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf(""), http.StatusBadRequest)
 		return
@@ -18,7 +17,7 @@ func NextDateReadGET(w http.ResponseWriter, r *http.Request) {
 
 	date := r.FormValue("date")
 	repeat := r.FormValue("repeat")
-	nextDate, err := service.NextDate(now, date, repeat)
+	nextDate, err := internal.NextDate(now, date, repeat)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf(""), http.StatusBadRequest)

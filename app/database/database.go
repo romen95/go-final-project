@@ -65,7 +65,7 @@ func InstallDb() {
 	createTable(db)
 }
 
-func InsertTask(task model.Task) (int, error) {
+func CreateTask(task model.Task) (int, error) {
 	result, err := db.Exec("INSERT INTO scheduler (date, title, comment, repeat) VALUES (:date, :title, :comment, :repeat)",
 		sql.Named("date", task.Date),
 		sql.Named("title", task.Title),
@@ -205,7 +205,7 @@ func UpdateTask(task model.Task) (model.Task, error) {
 	return task, nil
 }
 
-func DeleteTaskDb(id string) error {
+func DeleteTask(id string) error {
 	result, err := db.Exec("DELETE FROM scheduler WHERE id = :id",
 		sql.Named("id", id))
 	if err != nil {

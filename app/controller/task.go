@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/romen95/go_final_project/app/database"
+	"github.com/romen95/go_final_project/app/internal"
 	"github.com/romen95/go_final_project/app/model"
-	"github.com/romen95/go_final_project/app/service"
 )
 
 func responseWithError(w http.ResponseWriter, errorText string, err error) {
@@ -27,7 +27,7 @@ func responseWithError(w http.ResponseWriter, errorText string, err error) {
 	}
 }
 
-func TaskAddPOST(w http.ResponseWriter, r *http.Request) {
+func AddTask(w http.ResponseWriter, r *http.Request) {
 	var taskData model.Task
 	var buffer bytes.Buffer
 
@@ -42,16 +42,16 @@ func TaskAddPOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(taskData.Date) == 0 {
-		taskData.Date = time.Now().Format(model.DatePattern)
+		taskData.Date = time.Now().Format("20060102")
 	} else {
-		date, err := time.Parse(model.DatePattern, taskData.Date)
+		date, err := time.Parse("20060102", taskData.Date)
 		if err != nil {
 			responseWithError(w, "bad data format", err)
 			return
 		}
 
 		if date.Before(time.Now()) {
-			taskData.Date = time.Now().Format(model.DatePattern)
+			taskData.Date = time.Now().Format("20060102")
 		}
 	}
 
@@ -61,13 +61,13 @@ func TaskAddPOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(taskData.Repeat) > 0 {
-		if _, err := service.NextDate(time.Now(), taskData.Date, taskData.Repeat); err != nil {
+		if _, err := internal.NextDate(time.Now(), taskData.Date, taskData.Repeat); err != nil {
 			responseWithError(w, "invalid repeat format", errors.New("no such format"))
 			return
 		}
 	}
 
-	taskId, err := database.InsertTask(taskData)
+	taskId, err := database.CreateTask(taskData)
 	if err != nil {
 		responseWithError(w, "failed to create task", err)
 		return
@@ -94,7 +94,7 @@ func TasksReadGET(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			tasks, err = database.SearchTasks(search)
 		} else {
-			tasks, err = database.SearchTasksByDate(date.Format(model.DatePattern))
+			tasks, err = database.SearchTasksByDate(date.Format("20060102"))
 		}
 	} else {
 		err := errors.New("")
@@ -160,7 +160,7 @@ func TaskUpdatePUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := time.Parse(model.DatePattern, task.Date); err != nil {
+	if _, err := time.Parse("20060102", task.Date); err != nil {
 		responseWithError(w, "invalid date", err)
 		return
 	}
@@ -171,7 +171,7 @@ func TaskUpdatePUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(task.Repeat) > 0 {
-		if _, err := service.NextDate(time.Now(), task.Date, task.Repeat); err != nil {
+		if _, err := internal.NextDate(time.Now(), task.Date, task.Repeat); err != nil {
 			responseWithError(w, "invalid repeat format", errors.New("no such format"))
 			return
 		}
@@ -203,13 +203,13 @@ func TaskDonePOST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(task.Repeat) == 0 {
-		err = database.DeleteTaskDb(task.Id)
+		err = database.DeleteTask(task.Id)
 		if err != nil {
 			responseWithError(w, "failed to delete task", err)
 			return
 		}
 	} else {
-		task.Date, err = service.NextDate(time.Now(), task.Date, task.Repeat)
+		task.Date, err = internal.NextDate(time.Now(), task.Date, task.Repeat)
 		if err != nil {
 			responseWithError(w, "failed to get next date", err)
 			return
@@ -236,7 +236,7 @@ func TaskDonePOST(w http.ResponseWriter, r *http.Request) {
 func TaskDELETE(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
-	err := database.DeleteTaskDb(id)
+	err := database.DeleteTask(id)
 	if err != nil {
 		responseWithError(w, "failed to delete task", err)
 		return

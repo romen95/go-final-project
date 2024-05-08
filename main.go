@@ -13,8 +13,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+const PORT = 7540
+
 func getPort() int {
-	port := 7540
+	port := PORT
 	envPort := os.Getenv("TODO_PORT")
 	if len(envPort) > 0 {
 		if eport, err := strconv.ParseInt(envPort, 10, 32); err == nil {
@@ -31,8 +33,8 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Mount("/", http.FileServer(http.Dir(webDir)))
-	r.Get("/api/nextdate", controller.NextDateReadGET)
-	r.Post("/api/task", controller.TaskAddPOST)
+	r.Get("/api/nextdate", controller.NextDate)
+	r.Post("/api/task", controller.AddTask)
 	r.Get("/api/tasks", controller.TasksReadGET)
 	r.Get("/api/task", controller.TaskReadGET)
 	r.Put("/api/task", controller.TaskUpdatePUT)
