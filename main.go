@@ -16,15 +16,11 @@ import (
 const PORT = 7540
 
 func getPort() int {
-	port := PORT
-	envPort := os.Getenv("TODO_PORT")
-	if len(envPort) > 0 {
-		if eport, err := strconv.ParseInt(envPort, 10, 32); err == nil {
-			port = int(eport)
-		}
+	p, _ := strconv.ParseInt(os.Getenv("TODO_PORT"), 10, 32)
+	if p == 0 {
+		return PORT
 	}
-
-	return port
+	return int(p)
 }
 
 func main() {

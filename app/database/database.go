@@ -11,6 +11,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+var LIMIT = "30"
+
 var db *sql.DB
 
 func getDbFilePath() string {
@@ -86,7 +88,8 @@ func CreateTask(task model.Task) (int, error) {
 func ReadTasks() ([]model.Task, error) {
 	var tasks []model.Task
 
-	rows, err := db.Query("SELECT * FROM scheduler ORDER BY date")
+	rows, err := db.Query("SELECT * FROM scheduler ORDER BY date LIMIT :limit",
+		sql.Named("limit", LIMIT))
 	if err != nil {
 		return []model.Task{}, err
 	}
@@ -115,8 +118,9 @@ func SearchTasks(search string) ([]model.Task, error) {
 	var tasks []model.Task
 
 	search = fmt.Sprintf("%%%s%%", search)
-	rows, err := db.Query("SELECT * FROM scheduler WHERE title LIKE :search OR comment LIKE :search ORDER BY date",
-		sql.Named("search", search))
+	rows, err := db.Query("SELECT * FROM scheduler WHERE title LIKE :search OR comment LIKE :search ORDER BY date LIMIT :limit",
+		sql.Named("search", search),
+		sql.Named("limit", LIMIT))
 	if err != nil {
 		return []model.Task{}, err
 	}
@@ -144,8 +148,9 @@ func SearchTasks(search string) ([]model.Task, error) {
 func SearchTasksByDate(date string) ([]model.Task, error) {
 	var tasks []model.Task
 
-	rows, err := db.Query("SELECT * FROM scheduler WHERE date = :date",
-		sql.Named("date", date))
+	rows, err := db.Query("SELECT * FROM scheduler WHERE date = :date LIMIT :limit",
+		sql.Named("date", date),
+		sql.Named("limit", LIMIT))
 	if err != nil {
 		return []model.Task{}, err
 	}

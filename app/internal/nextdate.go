@@ -7,8 +7,10 @@ import (
 	"time"
 )
 
+const DATEPATTERN = "20060102"
+
 func NextDate(now time.Time, date string, repeat string) (string, error) {
-	taskDate, err := time.Parse("20060102", date)
+	taskDate, err := time.Parse(DATEPATTERN, date)
 	if err != nil {
 		return "", errors.New("bad date")
 	}
@@ -36,5 +38,5 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		return "", errors.New("format is bad")
 	}
 
-	return taskDate.Format("20060102"), nil
+	return taskDate.Format(DATEPATTERN), nil
 }
